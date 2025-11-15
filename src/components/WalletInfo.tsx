@@ -1,6 +1,6 @@
 import { useAccount, useBalance, useChainId, useSwitchChain } from 'wagmi';
 import { Wallet, Coins, Network, ArrowRightLeft } from 'lucide-react';
-import { base } from 'wagmi/chains';
+import { base, baseSepolia } from 'wagmi/chains';
 import { useState } from 'react';
 
 interface WalletInfoProps {
@@ -16,12 +16,15 @@ export function WalletInfo({ onToast }: WalletInfoProps) {
 
   if (!isConnected) return null;
 
-  const isBaseNetwork = chainId === base.id;
+  const isBaseMainnet = chainId === base.id;
+  const isBaseSepolia = chainId === baseSepolia.id;
+  const isBaseNetwork = isBaseMainnet || isBaseSepolia;
 
   const getChainName = (id: number) => {
     const chains: Record<number, string> = {
       1: 'Ethereum',
       8453: 'Base',
+      84532: 'Base Sepolia',
       137: 'Polygon',
       10: 'Optimism',
       42161: 'Arbitrum'
@@ -29,13 +32,13 @@ export function WalletInfo({ onToast }: WalletInfoProps) {
     return chains[id] || `Chain ${id}`;
   };
 
-  const handleSwitchToBase = async () => {
+  const handleSwitchNetwork = async (targetChainId: number, networkName: string) => {
     try {
       setIsSwitching(true);
-      onToast('Switching to Base network...', 'info');
-      await switchChain({ chainId: base.id });
+      onToast(`Switching to ${networkName}...`, 'info');
+      await switchChain({ chainId: targetChainId });
       setTimeout(() => {
-        onToast('Successfully switched to Base!', 'success');
+        onToast(`Successfully switched to ${networkName}!`, 'success');
         setIsSwitching(false);
       }, 1000);
     } catch (error: any) {
@@ -90,18 +93,51 @@ export function WalletInfo({ onToast }: WalletInfoProps) {
         </div>
         <div className="flex items-center justify-between">
           <p className="text-white font-semibold text-lg">{getChainName(chainId)}</p>
-          {!isBaseNetwork && (
-            <button
-              onClick={handleSwitchToBase}
-              disabled={isSwitching}
-              className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-blue-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center gap-2">
-                <ArrowRightLeft className={`w-4 h-4 text-blue-400 ${isSwitching ? 'animate-spin' : ''}`} />
-                <span className="text-blue-400 font-medium text-sm">Switch to Base</span>
-              </div>
-            </button>
-          )}
+          
+          {/* Show network switch buttons based on current network */}
+          <div className="flex items-center gap-2">
+            {/* If on Base Sepolia, show button to switch to Base Mainnet */}
+            {isBaseSepolia && (
+              <button
+                onClick={() => handleSwitchNetwork(base.id, 'Base Mainnet')}
+                disabled={isSwitching}
+                className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-blue-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className={`w-4 h-4 text-blue-400 ${isSwitching ? 'animate-spin' : ''}`} />
+                  <span className="text-blue-400 font-medium text-sm">Switch to Base</span>
+                </div>
+              </button>
+            )}
+            
+            {/* If on Base Mainnet, show button to switch to Base Sepolia */}
+            {isBaseMainnet && (
+              <button
+                onClick={() => handleSwitchNetwork(baseSepolia.id, 'Base Sepolia')}
+                disabled={isSwitching}
+                className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500/20 to-teal-500/20 hover:from-cyan-500/30 hover:to-teal-500/30 border border-cyan-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className={`w-4 h-4 text-cyan-400 ${isSwitching ? 'animate-spin' : ''}`} />
+                  <span className="text-cyan-400 font-medium text-sm">Switch to Sepolia</span>
+                </div>
+              </button>
+            )}
+            
+            {/* If on other networks, show button to switch to Base Mainnet */}
+            {!isBaseNetwork && (
+              <button
+                onClick={() => handleSwitchNetwork(base.id, 'Base Mainnet')}
+                disabled={isSwitching}
+                className="group relative px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 border border-blue-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className={`w-4 h-4 text-blue-400 ${isSwitching ? 'animate-spin' : ''}`} />
+                  <span className="text-blue-400 font-medium text-sm">Switch to Base</span>
+                </div>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
