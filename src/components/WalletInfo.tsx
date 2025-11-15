@@ -32,14 +32,18 @@ export function WalletInfo({ onToast }: WalletInfoProps) {
   const handleSwitchToBase = async () => {
     try {
       setIsSwitching(true);
-      switchChain({ chainId: base.id });
       onToast('Switching to Base network...', 'info');
+      await switchChain({ chainId: base.id });
       setTimeout(() => {
         onToast('Successfully switched to Base!', 'success');
-      }, 1500);
-    } catch (error) {
-      onToast('Failed to switch network', 'error');
-    } finally {
+        setIsSwitching(false);
+      }, 1000);
+    } catch (error: any) {
+      console.error('Failed to switch network:', error);
+      const errorMessage = error?.message?.includes('rejected')
+        ? 'Network switch rejected by user'
+        : 'Failed to switch network. Please try again.';
+      onToast(errorMessage, 'error');
       setIsSwitching(false);
     }
   };
