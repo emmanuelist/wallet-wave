@@ -3,19 +3,24 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { config, queryClient } from './config/wagmi';
 import { WalletButton } from './components/WalletButton';
 import { WalletInfo } from './components/WalletInfo';
+import { FaucetButton } from './components/FaucetButton';
 import { Toast } from './components/Toast';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import { useState } from 'react';
 import { Waves } from 'lucide-react';
+import { baseSepolia } from 'wagmi/chains';
 
 function WalletApp() {
   const { isConnected, isConnecting } = useAccount();
+  const chainId = useChainId();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info') => {
     setToast({ message, type });
   };
+
+  const isBaseSepolia = chainId === baseSepolia.id;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -43,7 +48,31 @@ function WalletApp() {
           <WalletButton />
 
           {isConnecting && <LoadingSkeleton />}
-          {isConnected && <WalletInfo onToast={showToast} />}
+          {isConnected && (
+            <>
+              <WalletInfo onToast={showToast} />
+              {isBaseSepolia ? (
+                <FaucetButton onToast={showToast} />
+              ) : (
+                <div className="w-full max-w-md p-6 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-xl border border-cyan-500/20">
+                  <div className="text-center space-y-3">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
+                      <Waves className="w-6 h-6 text-cyan-400" />
+                    </div>
+                    <h3 className="text-white font-semibold text-lg">Faucet Available on Base Sepolia</h3>
+                    <p className="text-gray-400 text-sm">
+                      Switch to Base Sepolia testnet to claim free testnet ETH
+                    </p>
+                    <div className="pt-2">
+                      <span className="text-xs text-gray-500">
+                        Current network: <strong className="text-white">{chainId === 8453 ? 'Base Mainnet' : `Chain ${chainId}`}</strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
 
         <div className="mt-12 p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 max-w-md">
