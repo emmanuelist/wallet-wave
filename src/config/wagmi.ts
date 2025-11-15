@@ -1,7 +1,7 @@
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { defaultWagmiConfig } from '@web3modal/wagmi/react/config';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, base, polygon, optimism, arbitrum } from 'wagmi/chains';
+import { mainnet, base, baseSepolia, polygon, optimism, arbitrum } from 'wagmi/chains';
 import { QueryClient } from '@tanstack/react-query';
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
@@ -13,7 +13,7 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
-const chains = [mainnet, base, polygon, optimism, arbitrum] as const;
+const chains = [mainnet, base, baseSepolia, polygon, optimism, arbitrum] as const;
 
 export const config = defaultWagmiConfig({
   chains,
